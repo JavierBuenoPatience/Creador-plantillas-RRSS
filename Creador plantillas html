@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Patience · Editor de Plantillas (SVG → PNG)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --brand1:#06D6A0; /* verde */
+      --brand2:#3563E9; /* azul */
+      --accent:#F97316; /* naranja */
+      --text:#1F2937;  /* gris oscuro */
+      --bg:#F9FAFB;    /* blanco cálido */
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Montserrat,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#0b1020;color:#e5e7eb}
+    header{position:sticky;top:0;z-index:3;backdrop-filter:saturate(1.2) blur(8px);background:rgba(15,23,42,.75);color:#fff;padding:16px 24px;border-bottom:1px solid rgba(255,255,255,.08)}
+    header h1{margin:0;font-weight:800;font-size:20px;letter-spacing:.3px}
+    main{display:grid;grid-template-columns:360px 1fr;gap:18px;padding:18px}
+    .panel{background:#0f172a;border:1px solid rgba(255,255,255,.08);border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+    .controls{padding:16px}
+    .controls h2{margin:0 0 8px;font-size:14px;text-transform:uppercase;letter-spacing:.2em;color:#9ca3af}
+    .field{display:flex;flex-direction:column;gap:6px;margin:10px 0}
+    .field label{font-size:12px;color:#cbd5e1}
+    .field input[type="text"], .field input[type="number"], .field select{background:#0b1227;border:1px solid #1f2a44;border-radius:10px;padding:10px 12px;color:#e5e7eb;font-size:14px;outline:none;}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .color input{width:100%;height:40px;border:1px solid #1f2a44;border-radius:10px;background:#0b1227}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;border-radius:12px;border:1px solid #1f2a44;background:#111b34;color:#e5e7eb;font-weight:700;cursor:pointer}
+    .btn.primary{background:linear-gradient(135deg,var(--brand1),var(--brand2));border:none;color:#041421}
+    .btn.ghost{background:#0b1227}
+    .buttons{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+    .canvas-wrap{display:grid;grid-template-columns:1fr;gap:18px}
+    .card{background:#0f172a;border:1px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden}
+    .card header{position:unset;background:unset;border:none;padding:14px 16px}
+    .preview{display:flex;align-items:center;justify-content:center;padding:16px;background:#020617}
+    .stage{width:800px;height:800px;background:#fff;border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.35);}
+    .brand-badges{display:flex;gap:8px;margin-top:12px}
+    .badge{font-size:11px;padding:6px 10px;border-radius:999px;border:1px solid #1f2a44;color:#cbd5e1;background:#0b1227}
+    .footer{padding:16px;color:#9CA3AF;font-size:12px}
+    svg text{user-select:none}
+  </style>
+</head>
+<body>
+<header>
+  <h1>Patience · Editor de Plantillas (SVG → PNG 800×800)</h1>
+</header>
+<main>
+  <aside class="panel controls" id="controlPanel">
+    <h2>Colores de marca</h2>
+    <div class="row">
+      <div class="field color"><label>Gradiente Inicio</label><input type="color" id="cStart" value="#06D6A0"></div>
+      <div class="field color"><label>Gradiente Fin</label><input type="color" id="cEnd" value="#3563E9"></div>
+    </div>
+    <div class="row">
+      <div class="field color"><label>Color de texto</label><input type="color" id="cText" value="#1F2937"></div>
+      <div class="field color"><label>Fondo (solo Plantilla 2)</label><input type="color" id="cBg" value="#FFFFFF"></div>
+    </div>
+    <div class="buttons">
+      <button class="btn ghost" id="resetColors">Restablecer marca</button>
+    </div>
+
+    <h2 style="margin-top:18px">Plantilla 2 · Frase</h2>
+    <div class="field"><label>Línea 1</label><input id="p2l1" type="text" value="La paciencia es la clave"></div>
+    <div class="field"><label>Línea 2</label><input id="p2l2" type="text" value="del éxito educativo"></div>
+    <div class="field"><label>Claim inferior</label><input id="p2claim" type="text" value="EDUCACIÓN CON TIEMPO"></div>
+    <div class="buttons">
+      <button class="btn primary" data-export="p2">Descargar PNG (P2)</button>
+      <button class="btn ghost" data-copy="p2">Copiar SVG (P2)</button>
+    </div>
+
+    <h2 style="margin-top:18px">Plantilla 3 · Anuncio</h2>
+    <div class="field"><label>Título línea 1</label><input id="p3t1" type="text" value="Metodología"></div>
+    <div class="field"><label>Título línea 2</label><input id="p3t2" type="text" value="Innovadora"></div>
+    <div class="field"><label>Subtítulo línea 1</label><input id="p3s1" type="text" value="Descubre nuestro enfoque personalizado"></div>
+    <div class="field"><label>Subtítulo línea 2</label><input id="p3s2" type="text" value="para el aprendizaje de cada estudiante"></div>
+    <div class="field"><label>Año (etiqueta)</label><input id="p3year" type="text" value="2025"></div>
+    <div class="buttons">
+      <button class="btn primary" data-export="p3">Descargar PNG (P3)</button>
+      <button class="btn ghost" data-copy="p3">Copiar SVG (P3)</button>
+    </div>
+
+    <div class="brand-badges">
+      <span class="badge">#06D6A0</span>
+      <span class="badge">#3563E9</span>
+      <span class="badge">#F97316</span>
+      <span class="badge">#1F2937</span>
+      <span class="badge">800×800 PNG</span>
+    </div>
+  </aside>
+
+  <section class="canvas-wrap">
+    <!-- Símbolo del logo mejorado: "P" con máscara y acento -->
+    <svg width="0" height="0" style="position:absolute">
+      <defs>
+        <symbol id="logoShape" viewBox="0 0 100 100">
+          <!-- Máscara para vaciar el ojo de la P -->
+          <mask id="logoMask">
+            <rect width="100" height="100" fill="#fff"/>
+            <circle cx="60" cy="34" r="14" fill="#000"/>
+          </mask>
+          <!-- Cuerpo de la P: barra + bowl superpuestos -->
+          <g mask="url(#logoMask)">
+            <rect x="24" y="15" width="24" height="70" rx="12" ry="12"/>
+            <circle cx="60" cy="34" r="26"/>
+          </g>
+          <!-- Acento inferior en corte diagonal (se pinta aparte) -->
+          <polygon id="logoAccent" points="24,66 48,66 24,90" />
+        </symbol>
+      </defs>
+    </svg>
+
+    <!-- Plantilla 2 -->
+    <article class="card">
+      <header><strong style="color:#e5e7eb">Plantilla 2 · Frase motivacional</strong></header>
+      <div class="preview">
+        <div class="stage" id="stage2">
+          <svg id="svgP2" width="800" height="800" viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="p2Grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop id="p2Stop1" offset="0%" stop-color="var(--brand1)" />
+                <stop id="p2Stop2" offset="100%" stop-color="var(--brand2)" />
+              </linearGradient>
+              <pattern id="p2dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+                <circle cx="20" cy="20" r="2" fill="#06D6A0" opacity="0.05"/>
+              </pattern>
+            </defs>
+            <rect id="p2bg" width="800" height="800" fill="#FFFFFF"/>
+            <rect width="800" height="800" fill="url(#p2dots)"/>
+
+            <!-- Logo mejorado -->
+            <g transform="translate(60,60) scale(6)">
+              <use href="#logoShape" fill="url(#p2Grad)"/>
+              <use href="#logoAccent" fill="var(--brand2)"/>
+            </g>
+
+            <text x="400" y="200" font-family="Montserrat, Arial, sans-serif" font-size="120" font-weight="800" text-anchor="middle" fill="url(#p2Grad)" opacity="0.8">"</text>
+            <text id="p2l1Text" x="400" y="350" font-family="Montserrat, Arial, sans-serif" font-size="42" font-weight="800" text-anchor="middle" fill="#1F2937">La paciencia es la clave</text>
+            <text id="p2l2Text" x="400" y="400" font-family="Montserrat, Arial, sans-serif" font-size="42" font-weight="800" text-anchor="middle" fill="#1F2937">del éxito educativo</text>
+            <line x1="350" y1="480" x2="450" y2="480" stroke="url(#p2Grad)" stroke-width="6" stroke-linecap="round"/>
+            <text x="400" y="540" font-family="Montserrat, Arial, sans-serif" font-size="28" font-weight="800" text-anchor="middle" fill="url(#p2Grad)">PATIENCE</text>
+            <text id="p2claimText" x="400" y="570" font-family="Montserrat, Arial, sans-serif" font-size="16" font-weight="600" text-anchor="middle" fill="#6B7280" letter-spacing="2">EDUCACIÓN CON TIEMPO</text>
+            <circle cx="720" cy="680" r="16" fill="url(#p2Grad)" opacity="0.6"/>
+          </svg>
+        </div>
+      </div>
+      <div class="footer">Consejo: Mantén las frases en 2 líneas para mejor legibilidad.</div>
+    </article>
+
+    <!-- Plantilla 3 -->
+    <article class="card">
+      <header><strong style="color:#e5e7eb">Plantilla 3 · Anuncio / Innovación (oscura)</strong></header>
+      <div class="preview">
+        <div class="stage" id="stage3" style="background:transparent">
+          <svg id="svgP3" width="800" height="800" viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="p3bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1F2937" />
+                <stop offset="100%" stop-color="#111827" />
+              </linearGradient>
+              <linearGradient id="p3Grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop id="p3Stop1" offset="0%" stop-color="var(--brand1)" />
+                <stop id="p3Stop2" offset="100%" stop-color="var(--brand2)" />
+              </linearGradient>
+            </defs>
+            <rect width="800" height="800" fill="url(#p3bgGrad)"/>
+            <circle cx="650" cy="400" r="160" fill="url(#p3Grad)" opacity="0.12"/>
+
+            <!-- Logo mejorado -->
+            <g transform="translate(60,60)">
+              <rect width="96" height="96" rx="18" fill="url(#p3Grad)"/>
+              <g transform="translate(12,12) scale(0.96)">
+                <use href="#logoShape" fill="#ffffff" opacity="0.98"/>
+                <use href="#logoAccent" fill="#e8efff" opacity="0.9"/>
+              </g>
+            </g>
+
+            <g transform="translate(650, 60)">
+              <text x="0" y="0" font-family="Montserrat, Arial, sans-serif" font-size="20" font-weight="600" fill="#9CA3AF">NUEVO</text>
+              <text id="p3yearText" x="0" y="30" font-family="Montserrat, Arial, sans-serif" font-size="28" font-weight="800" fill="#10B981">2025</text>
+            </g>
+            <text id="p3t1Text" x="400" y="350" font-family="Montserrat, Arial, sans-serif" font-size="48" font-weight="800" text-anchor="middle" fill="#ffffff">Metodología</text>
+            <text id="p3t2Text" x="400" y="410" font-family="Montserrat, Arial, sans-serif" font-size="48" font-weight="800" text-anchor="middle" fill="#ffffff">Innovadora</text>
+            <text id="p3s1Text" x="400" y="480" font-family="Montserrat, Arial, sans-serif" font-size="24" font-weight="500" text-anchor="middle" fill="#D1D5DB">Descubre nuestro enfoque personalizado</text>
+            <text id="p3s2Text" x="400" y="515" font-family="Montserrat, Arial, sans-serif" font-size="24" font-weight="500" text-anchor="middle" fill="#D1D5DB">para el aprendizaje de cada estudiante</text>
+            <g transform="translate(60, 680)">
+              <text x="0" y="0" font-family="Montserrat, Arial, sans-serif" font-size="36" font-weight="800" fill="#ffffff">PATIENCE</text>
+              <text x="0" y="30" font-family="Montserrat, Arial, sans-serif" font-size="18" font-weight="700" fill="#9CA3AF" letter-spacing="2">EDUCACIÓN CON TIEMPO</text>
+            </g>
+            <g transform="translate(680, 680)">
+              <circle cx="20" cy="20" r="20" fill="url(#p3Grad)"/>
+              <path d="M15 20 L25 20 M20 15 L25 20 L20 25" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </g>
+          </svg>
+        </div>
+      </div>
+      <div class="footer">Tip: Mantén títulos de 1–2 palabras por línea para impacto.</div>
+    </article>
+  </section>
+</main>
+
+<script>
+const $ = (s, r=document)=> r.querySelector(s);
+const $$ = (s, r=document)=> Array.from(r.querySelectorAll(s));
+
+const cStart = $('#cStart');
+const cEnd   = $('#cEnd');
+const cText  = $('#cText');
+const cBg    = $('#cBg');
+
+const p2Stop1 = $('#p2Stop1');
+const p2Stop2 = $('#p2Stop2');
+const p2Text1 = $('#p2l1Text');
+const p2Text2 = $('#p2l2Text');
+const p2Claim = $('#p2claimText');
+const p2bg    = $('#p2bg');
+
+const p3Stop1 = $('#p3Stop1');
+const p3Stop2 = $('#p3Stop2');
+const p3Year  = $('#p3yearText');
+const p3t1    = $('#p3t1Text');
+const p3t2    = $('#p3t2Text');
+const p3s1    = $('#p3s1Text');
+const p3s2    = $('#p3s2Text');
+
+$('#p2l1').addEventListener('input', e=> p2Text1.textContent = e.target.value);
+$('#p2l2').addEventListener('input', e=> p2Text2.textContent = e.target.value);
+$('#p2claim').addEventListener('input', e=> p2Claim.textContent = e.target.value);
+$('#p3t1').addEventListener('input', e=> p3t1.textContent = e.target.value);
+$('#p3t2').addEventListener('input', e=> p3t2.textContent = e.target.value);
+$('#p3s1').addEventListener('input', e=> p3s1.textContent = e.target.value);
+$('#p3s2').addEventListener('input', e=> p3s2.textContent = e.target.value);
+$('#p3year').addEventListener('input', e=> p3Year.textContent = e.target.value);
+
+function applyColors(){
+  const s = cStart.value, e = cEnd.value, t = cText.value, b = cBg.value;
+  p2Stop1.setAttribute('stop-color', s);
+  p2Stop2.setAttribute('stop-color', e);
+  p3Stop1.setAttribute('stop-color', s);
+  p3Stop2.setAttribute('stop-color', e);
+  p2Text1.setAttribute('fill', t);
+  p2Text2.setAttribute('fill', t);
+  p2bg.setAttribute('fill', b);
+}
+[cStart,cEnd,cText,cBg].forEach(i=> i.addEventListener('input', applyColors));
+$('#resetColors').addEventListener('click', ()=>{
+  cStart.value = '#06D6A0';
+  cEnd.value   = '#3563E9';
+  cText.value  = '#1F2937';
+  cBg.value    = '#FFFFFF';
+  applyColors();
+});
+applyColors();
+
+async function svgToPng(svgEl, fileName='patience.png'){
+  const svg = svgEl.cloneNode(true);
+  svg.querySelectorAll('text').forEach(t=>{
+    t.setAttribute('font-family','Montserrat, Arial, sans-serif');
+    t.setAttribute('paint-order','stroke');
+  });
+  const xml = new XMLSerializer().serializeToString(svg);
+  const svg64 = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml);
+  const img = new Image();
+  img.decoding = 'sync';
+  img.crossOrigin = 'anonymous';
+  const canvas = document.createElement('canvas');
+  const W = 800, H = 800;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = true;
+  await new Promise((res, rej)=>{ img.onload = res; img.onerror = rej; img.src = svg64; });
+  ctx.clearRect(0,0,W,H);
+  ctx.drawImage(img, 0, 0, W, H);
+  canvas.toBlob(blob=>{
+    const a = document.createElement('a');
+    a.download = fileName;
+    a.href = URL.createObjectURL(blob);
+    document.body.appendChild(a);
+    a.click();
+    URL.revokeObjectURL(a.href);
+    a.remove();
+  }, 'image/png');
+}
+
+$$('[data-export="p2"]').forEach(b=> b.addEventListener('click', ()=> svgToPng($('#svgP2'), `Patience_Plantilla2_${Date.now()}.png`)));
+$$('[data-export="p3"]').forEach(b=> b.addEventListener('click', ()=> svgToPng($('#svgP3'), `Patience_Plantilla3_${Date.now()}.png`)));
+
+async function copySvg(svgEl){
+  const xml = new XMLSerializer().serializeToString(svgEl);
+  await navigator.clipboard.writeText(xml);
+  alert('Código SVG copiado al portapapeles.');
+}
+$$('[data-copy="p2"]').forEach(b=> b.addEventListener('click', ()=> copySvg($('#svgP2'))));
+$$('[data-copy="p3"]').forEach(b=> b.addEventListener('click', ()=> copySvg($('#svgP3'))));
+</script>
+</body>
+</html>
